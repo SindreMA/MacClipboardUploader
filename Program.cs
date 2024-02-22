@@ -4,6 +4,7 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using SharpHook;
+using TextCopy;
 
 var settingsFilePath = "settings.json";
 if (!File.Exists(settingsFilePath))
@@ -70,6 +71,8 @@ async Task UploadClipboard()
     var arguments = @$"-server={settings.FtpServer} -username={settings.Username} -password={settings.Password} -webServer={settings.UploadUrl}";
 
     RunCliTool(executabledPath, arguments);
+    ShowNotification("File uploaded", ClipboardService.GetText()!);
+    PlayNotificationSound(" /System/Library/Sounds/Glass.aiff");
 }
 
 
@@ -115,3 +118,54 @@ string RunCliTool(string fileName, string arguments)
         // Return the output from the CLI tool
         return output.ToString();
     }
+
+
+void ShowNotification(string title, string message)
+{
+    // Escape double quotes in title and message
+    title = title.Replace("\"", "\\\"");
+    message = message.Replace("\"", "\\\"");
+
+    // AppleScript to show notification
+    var appleScript = $"display notification \\\"{message}\\\" with title \\\"{title}\\\"";
+
+    // Prepare the osascript command
+    var startInfo = new ProcessStartInfo
+    {
+        FileName = "/bin/bash",
+        Arguments = $"-c \"osascript -e '{appleScript}'\"",
+        UseShellExecute = false,
+        CreateNoWindow = true,
+    };
+
+    // Execute the command
+    using (var process = Process.Start(startInfo))
+    {
+        process.WaitForExit();
+    }
+}
+
+void PlayNotificationSound(string soundFilePath)
+{
+    try
+    {
+        using (var process = new Process())
+        {
+            process.StartInfo = new ProcessStartInfo
+            {
+                FileName = "afplay",
+                Arguments = soundFilePath,
+                CreateNoWindow = true,
+                UseShellExecute = false
+            };
+
+            process.Start();
+            process.WaitForExit(); // Wait for the sound to finish playing
+        }
+    }
+    catch (Exception ex)
+    {
+        // Handle exceptions (e.g., file not found, afplay not available)
+        Console.WriteLine($"Error playing sound: {ex.Message}");
+    }
+}
