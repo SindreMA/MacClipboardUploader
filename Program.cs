@@ -24,7 +24,7 @@ var shiftDown = false;
 var cmdDown = false;
 
 
-hook.KeyPressed += async (a, b) =>
+hook.KeyPressed += (a, b) =>
 {
     var key = b.RawEvent.Keyboard.RawCode;
     if (key == 56)
@@ -40,7 +40,7 @@ hook.KeyPressed += async (a, b) =>
     {
         if (key == 18)
         {
-            await UploadClipboard();
+            UploadClipboard();
         }
     }
 };
@@ -62,13 +62,13 @@ hook.KeyReleased += (a, b) =>
 hook.Run();
 
 
-async Task UploadClipboard()
+void UploadClipboard()
 {
     Console.WriteLine("Uploading clipboard...");
 
     var executabledPath = Path.Combine(Environment.CurrentDirectory, "External", "MacClipboardUpload");
 
-    var arguments = @$"-server={settings.FtpServer} -username={settings.Username} -password={settings.Password} -webServer={settings.UploadUrl}";
+    var arguments = @$"-server={settings!.FtpServer} -username={settings.Username} -password={settings.Password} -webServer={settings.UploadUrl}";
 
     RunCliTool(executabledPath, arguments);
     ShowNotification("File uploaded", ClipboardService.GetText()!);
@@ -141,7 +141,7 @@ void ShowNotification(string title, string message)
     // Execute the command
     using (var process = Process.Start(startInfo))
     {
-        process.WaitForExit();
+        process!.WaitForExit();
     }
 }
 
