@@ -68,7 +68,7 @@ void UploadClipboard()
 
     var executabledPath = Path.Combine(Environment.CurrentDirectory, "External", "MacClipboardUpload");
 
-    var arguments = @$"-server={settings!.FtpServer} -username={settings.Username} -password={settings.Password} -webServer={settings.UploadUrl}";
+    var arguments = @$"-server={settings!.FtpServer} -username={settings.Username} -password={settings.Password} -webServer={settings.UploadUrl} -port={settings.Port}";
 
     RunCliTool(executabledPath, arguments);
     ShowNotification("File uploaded", ClipboardService.GetText()!);
@@ -106,6 +106,8 @@ string RunCliTool(string fileName, string arguments)
             // Read the output stream first and then wait.
             output.Append(process.StandardOutput.ReadToEnd());
             output.Append(process.StandardError.ReadToEnd());
+
+            System.Console.WriteLine(output.ToString());
 
             process.WaitForExit(); // Wait for the process to exit
         }
